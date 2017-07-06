@@ -1,5 +1,4 @@
-
-TrinityX
+Overview
 ========
 
 Welcome to TrinityX!
@@ -10,7 +9,51 @@ The full documentation is available in the ``doc`` subdirectory.
 
 
 Quick start
------------
+===========
+
+In standard configuration TrinityX provides the following services to the cluster:
+
+* Luna, our default super-efficient node provisioner https://github.com/clustervision/luna
+* OpenLDAP
+* SLURM
+* Zabbix
+* NTP
+* and more
+
+It will also set up:
+
+* NFS-shared home and application directories
+* environment modules
+* rsyslog
+* and more
+
+
+Default installation
+~~~~~~~~~~~~~~~~~~~~
+
+Running TrinityX installer with the default configuration file will:
+
+* in case of a single-controller setup, i.e. non-HA:
+  
+  - set the controller's name to ``controller``
+    
+    **Note**: the provisioning interface is expected to be assigned ``10.141.255.254`` *prior* to the installation
+    
+* in case of a dual-controller setup, i.e. HA: 
+  
+  - set controllers' names to ``controller1`` and ``controller2``, respectively
+  - create a floating IP address ``10.141.255.252`` and associate the hostname ``controller`` with it
+    
+    **Note**: the provisioning interfaces are expected to be assigned ``10.141.255.254`` and ``10.141.255.253``, respectively, *prior* to the installation
+  - create an XFS filesystem on a specified block device, set up replication of the filesystem between the two controllers via DRBD and mount it as /trinity
+  
+* in both cases:
+
+  - define a provisioning network 10.141.0.0/16 and associate a domain name ``cluster`` with it
+  - create shared directories under /trinity
+  - generate a random password for each service that requires it
+
+Steps to install TrinityX
 
 1. Install CentOS Minimal on your controller(s)
 
@@ -27,8 +70,8 @@ Quick start
 
 5. Based on whether you're setting up HA or not, edit a corresponding configuration file:
        
-     -     ``controller-nonHA.cfg``
-     -     ``controller-HA.cfg``
+   * ``controller-nonHA.cfg``
+   * ``controller-HA.cfg``
 
    or better yet, create a custom configuration file that overrides all the neccessary parameters::
 
