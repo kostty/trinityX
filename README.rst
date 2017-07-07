@@ -29,7 +29,7 @@ It will also set up:
 
 
 Default installation
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
 Running TrinityX installer with the default configuration file will:
 
@@ -45,7 +45,7 @@ Running TrinityX installer with the default configuration file will:
   - create a floating IP address ``10.141.255.252`` and associate the hostname ``controller`` with it
     
     **Note**: the provisioning interfaces are expected to be assigned ``10.141.255.254`` and ``10.141.255.253``, respectively, *prior* to the installation
-  - create an XFS filesystem on a specified block device, set up replication of the filesystem between the two controllers via DRBD and mount it as /trinity
+  - create an XFS filesystem on a specified block device, which is assumed to be shared between the controllers, and mount it as /trinity
   
 * in both cases:
 
@@ -54,6 +54,7 @@ Running TrinityX installer with the default configuration file will:
   - generate a random password for each service that requires it
 
 Steps to install TrinityX
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. Install CentOS Minimal on your controller(s)
 
@@ -68,12 +69,48 @@ Steps to install TrinityX
     # git clone http://github.com/clustervision/trinityx
     # cd trinityX/configuration
 
-5. Based on whether you're setting up HA or not, edit a corresponding configuration file:
+5. Based on whether you're installing a single-controller or a high-availability (HA) setup, you might want to check one of the configuration files:
        
    * ``controller-nonHA.cfg``
    * ``controller-HA.cfg``
 
-   or better yet, create a custom configuration file that overrides all the neccessary parameters::
+   to see if the default firewall parameters apply to your situation::
+   
+     FWD_PUBLIC_IF="eth2"
+     FWD_TRUSTED_IF="eth0 eth1"
+
+   Moreover, in the case of an HA setup you will most probably need to change the default name of the shared block device set by ``SHARED_FS_DEVICE``.
+
+6. Start TrinityX installation
+
+   **Note**: In the case of HA, complete the installation on the first controller first, then run it on the second one::
+
+     # ./configure.sh <target_configuration_file> |& tee -a install.log
+    
+   **Note**: If the installer pauses with a prompt for the next action, analyze the error(s) in the output above and try to fix it in another console *without* cancelling the installation.
+    
+7. Create a default OS image::
+
+    # ./configure.sh images-create-compute.cfg |& tee -a image.log
+
+Now you have your controller(s) installed and the default OS image created!
+
+Customizing your installation
+-----------------------------
+
+Now, if you want to tailor TrinityX to your needs, you can modify the configuration file, or better yet, create a custom configuration file that imports all the default configuration and only overrides what's neccessary.
+
+Descriptions to configuration options are given inside ``controller-HA.cfg``. Options that might be changed include:
+
+* controller's hostnames and IP addresses
+* shared storage backing device
+* DHCP dynamic range
+* firewall settings
+* passwords
+
+You can also choose which components to exclude from the installation by modifying ``POSTLIST``.
+
+A custom configuration file would look similar to the following::
 
      # vim my.cfg
      #!/bin/bash
@@ -108,15 +145,7 @@ Steps to install TrinityX
      LUNA_DHCP_RANGE_START=192.168.10.150
      LUNA_DHCP_RANGE_END=192.168.10.200
 
+Documentation
+=============
 
-6. Start TrinityX installation::
-
-    # ./configure.sh <target_configuration_file> |& tee -a install.log
-    
-7. Create a default compute image::
-
-    # ./configure.sh images-create-compute.cfg |& tee -a image.log
-
-
-This will set up the controller with the default configuration, then create and set up a compute image.
-
+*Steps how to build TrinityX administration guide and links to other documents will be added later.*
